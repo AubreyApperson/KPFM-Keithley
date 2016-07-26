@@ -1,18 +1,20 @@
 #pragma rtGlobals=1		// Use modern global access method.
 
+// This work supported by NSF Career Award DMR -1056861.
+
 //Description:  This proceedure file contains commands to set a Keithley 2400 sourcemeter to a particular voltage.
 //  This is helpful as samples can be biased while running AFM or KPFM on them.  Note that aggregate information
-//  can be helpful in determining DOS data on samples.  
+//  can be helpful in determining DOS data on samples.
 
-// Usage:  	To load this proceedure, open your current experiment proceedure window (Windows > proceedure windows > 
-//				proceedure window), paste ' #include "your_file_path_here" 'and change it to the file path of this file 
+// Usage:  	To load this proceedure, open your current experiment proceedure window (Windows > proceedure windows >
+//				proceedure window), paste ' #include "your_file_path_here" 'and change it to the file path of this file
 // 				for example:  ' #include "C:\Documents and Settings\computation\Desktop\kpfmv2.0"  '.
 //			1. Use the command "globalvars()" to set your main parameters.
 //			2. Use the command "kpfmv()" to activate the Keithley and set the bias voltage
 //			3. Use the command "inc()" to increment the output voltage by the amount specified after running globalvars()
 //			4. *** Always use "stop()"*** to kill all global variables created by "globalvars()" and turn the Keithley off.
 
-// For more help, type 'help()' in the command window.  
+// For more help, type 'help()' in the command window.
 // The steps in usage can be viewed by typing 'process()' once this proceedure file is loaded properly.
 
 
@@ -25,39 +27,39 @@ Function kpfmv()
 	viOpenDefaultRM(session_ID)
 	//Printf "session ID=%d\r",  session_ID
 	//Printf "Note that the session ID can be passed to viOpen to open an insturment session. \r"
-	 
+
 	String resource_name = "GPIB0::24::INSTR"
 	//Printf "Resource Name=%s\r",  resource_name
 	Variable status
 	status = viOpen(session_ID, resource_name, 0, 0, instr)
-	 
+
 	VISAWrite instr, ":*RST" // Restore GPIB default conditions
 	VISAWrite instr, ":*ESE 0" // Program the Standard Event Enable Register
 	VISAWrite instr, ":*CLS" // Clears all event registers and Error Queue
 	VISAWrite instr, ":FORM:SREG BIN" // Format register to binary
-	 
+
 	VISAWrite instr, ":TRAC:FEED:CONT NEVER" // Disable any residual data collection in buffer
 	VISAWrite instr, ":TRAC:CLE" // Clear buffer
-	
+
 	VISAWrite instr, ":SOUR:FUNC:MODE VOLT" // Select voltage source mode
 	VISAWrite instr, ":SOUR:VOLT:MODE FIX" // Select voltage source to fixed mode (output constant value)
 	VISAWrite instr, ":SOUR:DEL:AUTO OFF" // Source auto delay off (use DELAY to program delay between source and measure)
-	VISAWrite instr, ":SOUR:DEL 0" // No source delay 
-	
+	VISAWrite instr, ":SOUR:DEL 0" // No source delay
+
 	// take inputted global variable "vout" and turn into string
 	//concatenate string for sending via SCPI command to keithley
 	String outvstr = ":SOUR:VOLT:LEV " + num2str(vout)
-	
-	VISAWrite instr, outvstr 	// (now send the command)  set the output to THIS level (in volts) 
+
+	VISAWrite instr, outvstr 	// (now send the command)  set the output to THIS level (in volts)
 	VISAWrite instr, ":SENS:CURR:PROT 1E-5"  // 10mA compliance
 	VISAWrite instr, ":SOUR:VOLT:RANG 100"	// select source range
-	
+
 	VISAWrite instr, ":OUTP ON"
-	 
+
 	 viClose(session_ID)
 	 sleep/s/C=0 delay //make the program wait "delay" (global variable) seconds while the keithley adjusts it's voltage
-	  
-	  
+
+
 	  // a little extra
 	  if (iter ==3)
 	  	print "\rEverything appears to be working properly!!\r\r"
@@ -65,7 +67,7 @@ Function kpfmv()
 	  	print "\rYep.  25 iterations.  This end looks good.  How does the image look?  I'm sure you'll check it soon enough.\r\r"
 	  elseif (iter ==50)
 	  	print "\rYep.  50 iterations.  This end looks good.  How does the image look?  I'm sure you'll check it soon enough.\r\r"
-	  elseif (iter ==100) 
+	  elseif (iter ==100)
 	  	print "\rHow do you like that!? 100 iterations! Take that world...\r\r"
 	  elseif (iter ==200)
 	  	print "\rAlright, I don't know what else to say.  It works, (iteration 200) this is it for me.\r   -Aubrey \r\r"
@@ -75,7 +77,7 @@ Function kpfmv()
 	  		print iteralert
 	  	endif
 	  endif
-	  
+
 end
 
 
@@ -116,13 +118,13 @@ end
 
 Function/S DateTimeStamp()
 	String dstr, tstr
- 
+
 	Variable timestamp = DateTime
 	String sep_char = "."
- 
+
 	tstr = Secs2Time(timestamp, 3)
 	dstr = Secs2Date(timestamp, -2, sep_char)
- 
+
 	// Replace numeric month with text abbreviation.
 	String months = "Jan;Feb;Mar;Apr;May;Jun;Jul;Aug;Sep;Oct;Nov;Dec;"
 	String month_abbreviation = StringFromList(str2num(StringFromList(1, dstr, sep_char)) - 1, months, ";")
