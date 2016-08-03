@@ -1,5 +1,6 @@
 #pragma rtGlobals=1		// Use modern global access method.
 #pragma version = 2.1
+// This work supported by NSF Career Award DMR -1056861
 
 //Description:  This proceedure file contains commands to set a Keithley 2400 sourcemeter to a particular voltage.
 //  This is helpful as samples can be biased while running AFM or KPFM on them.  Note that aggregate information
