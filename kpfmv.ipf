@@ -103,7 +103,7 @@ Function globalvars(start_volt1, end_volt1, stepsize1, delay1)
 			printf "Hey, your start voltage is %d and your end voltage is %d, but your step size, %2.3f, is positive.\r", start_volt, end_volt, stepsize
 			printf "Let me fix that for you.\r"
 			stepsize=stepsize*(-1);
-			printf "Now your step size is %2.3f\r\r", stepsize
+			printf "Now your step size is %2.3f\r No further action is required from you.\r\r", stepsize
 		else // they set the step size to zero
 			DoWindow/H
 			printf "**Caution**    Step size is zero!! (But hey, I'm not stopping you.)\r"
@@ -115,7 +115,7 @@ Function globalvars(start_volt1, end_volt1, stepsize1, delay1)
 			printf "Hey, your start voltage is %d and your end voltage is %d, but your step size, %2.3f, is negative.\r", start_volt, end_volt, stepsize
 			printf "Let me fix that for you.\r"
 			stepsize=stepsize*(-1);
-			printf "Now your step size is %2.3f\r\r", stepsize
+			printf "Now your step size is %2.3f\r No further action is required from you.\r\r", stepsize
 		else // they set the step size to zero
 			DoWindow/H
 			printf "**Caution**    Step size is zero!! (But hey, I'm not stopping you.)\r"
@@ -124,14 +124,14 @@ Function globalvars(start_volt1, end_volt1, stepsize1, delay1)
 		printf "You have the starting voltage and ending voltages set equal.\r"
 		printf "That is not a valid option.  Aborting.\r\r"
 		abort
-	endif
-	//end check sign
+	endif   //end check sign
+	
 	
 	vout = start_volt
-	Printf "Start Voltage = %d\r", start_volt
-	Printf "End Voltage = %d\r", end_volt
-	Printf "Voltage step size = %d\r", stepsize
-	Printf "delay time before scan = %d\r", delay
+	Printf "Start Voltage = %d volts\r", start_volt
+	Printf "End Voltage = %d volts \r", end_volt
+	Printf "Voltage step size = %3.3f volts \r", stepsize
+	Printf "delay time before scan = %d second(s)\r", delay
 end
 
 
@@ -148,5 +148,32 @@ Function itercheck()  // this function resets the variable iter if the user runs
 	if ((vout ==start_volt) && (iter != 0))
 		iter = 0
 		printf "iter reset.  You didn't run stop() to reset variables.\r"
+	endif
+end
+
+
+Function check(step)  // step number after the loop in the macro, program will be directed to that step when 
+// the check fails.  Checks to see if vout is outside of the range vstart to vend
+	Variable step
+	Variable K = 0
+	Variable/G vout, start_volt, end_volt // aquire global variables for checking.
+	
+	// remember there are two cases, we could be counting up from start to end or down from start to end
+	if (vout<start_volt)
+		if (vout>=end_volt)
+		elseif (vout<end_volt)
+			K = 1
+		endif
+	elseif (vout>start_volt)
+		if (vout<=end_volt)
+		elseif (vout>end_volt)
+			K = 1
+		endif
+	endif     //other option is vout == start_voltage, so no issues
+	
+	
+	if (K ==1)  // K is our break-out flag, create break command
+		String gotostep = "GoToStep(" + num2str(step) +")"
+		Execute/P gotostep
 	endif
 end
