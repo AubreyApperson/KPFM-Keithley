@@ -9,4 +9,7 @@ A macro that is preset to run the local density of states measurement when loade
 ## KPFM Experiment template.pxp
 A experiment template that automatically loads all necesary files for the Keithley-Igor communcation for KPFM measurements on Asylum AFM.
 
-For more information, see the help file in the Igor-batch-OSC repository labeled Igor Help File KPFM extension.ihf
+## Igor Help File KPFM extension.ifn 
+The notebook (editable) help file.
+## Igor Help File KPFM extension.ihf 
+A compiled help file that igor can incorporate and immediately being searching.
