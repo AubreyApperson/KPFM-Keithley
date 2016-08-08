@@ -19,12 +19,27 @@
 // The steps in usage can be viewed by typing 'process()' once this proceedure file is loaded properly.
 
 
-Function kpfmv()
+Function kpfmv([voltage])
 // Main Function:  Tell keithley to turn on and output voltage "vout" (global variable)
 // After changing voltage, wait time specified by (global variable) "delay" before continuing.
+	Variable voltage
 	itercheck()  // make sure the user reset variables if they terminated the program early
 	Variable /G start_volt, end_volt, stepsize, delay, vout, iter  // acquire this global variable for use in this function
 	Variable session_ID, instr, status
+	
+	// handle optional input if present // this section immediately sets the keithley to a value if the optional parameter 
+	// to kpfmv() is detected.  This is useful when testing the AFM scan with bias before beginnning iterative scanning 
+	// with with other functions.
+	if (ParamIsDefault(voltage)==0)  // check for the voltage, if it isn't present, ignore statements below and use default behavior
+		// if we get to here, voltage was specified
+		variable vsave = vout // we save the original vout value and return it back before ending this function.
+		variable delaysave = delay
+		delay = 0
+		vout = voltage
+	endif
+	
+	
+	
 	viOpenDefaultRM(session_ID)  // Find the default instrument and its session ID to pass viOpen to open an insturment session.
 	String resource_name = "GPIB0::24::INSTR"
 	status = viOpen(session_ID, resource_name, 0, 0, instr)
@@ -72,21 +87,31 @@ Function kpfmv()
 	  	endif
 	endif
 	
+	// handle optional input if present 
+	if (ParamIsDefault(voltage)==0)
+		// if we get to here, voltage was specified
+		vout=vsave  // return the original vout value before the optional parameter was detected.
+		delay = delaysave
+	endif
 end
 
 
 Function stop()
 // turns off keithley output and releases global variable vout
 	killvariables /Z vout, iter, start_volt, end_volt, stepsize, delay
-	printf "killvariables = success\r"
+	printf "killvariables = success;   "
 	Variable session_ID, instr
 	viOpenDefaultRM(session_ID)
 	String resource_name = "GPIB0::24::INSTR"
 	viOpen(session_ID, resource_name, 0, 0, instr)
 	VISAWrite instr, ":OUTP OFF"
 	viClose(session_ID)
+	if (V_status ==1)
+		printf "Voltage output off\r"
+	else 
+		printf "Error occured, voltage output is ACTIVE.  Manually power output off.\r"
+	endif
 end
-
 
 Function globalvars(start_volt1, end_volt1, stepsize1, delay1)
 	// declare global variable "vout" for the voltage level output for the keithley device
